@@ -32,7 +32,7 @@ namespace Tsarkel.Systems.Tsunami
         [Tooltip("Current tsunami event count (for intensity scaling)")]
         [SerializeField] private int eventCount = 0;
         
-        private enum TsunamiPhase
+        public enum TsunamiPhase
         {
             Idle,
             Warning,

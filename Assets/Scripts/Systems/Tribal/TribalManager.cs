@@ -2,6 +2,7 @@ using UnityEngine;
 using Tsarkel.Managers;
 using Tsarkel.Systems.Zone;
 using Tsarkel.ScriptableObjects.Tribal;
+using Tsarkel.ScriptableObjects.Zone;
 
 namespace Tsarkel.Systems.Tribal
 {
