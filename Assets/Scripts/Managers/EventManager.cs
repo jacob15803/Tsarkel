@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Tsarkel.ScriptableObjects.Zone;
 
 namespace Tsarkel.Managers
 {
@@ -161,13 +162,13 @@ namespace Tsarkel.Managers
         /// Event fired when player enters a zone.
         /// Parameters: (zoneData)
         /// </summary>
-        public event Action<ScriptableObjects.Zone.ZoneData> OnZoneEntered;
+        public event Action<ZoneData> OnZoneEntered;
         
         /// <summary>
         /// Event fired when player exits a zone.
         /// Parameters: (zoneData)
         /// </summary>
-        public event Action<ScriptableObjects.Zone.ZoneData> OnZoneExited;
+        public event Action<ZoneData> OnZoneExited;
         
         #endregion
         
@@ -328,12 +329,12 @@ namespace Tsarkel.Managers
         }
         
         // Zone Events
-        public void InvokeZoneEntered(ScriptableObjects.Zone.ZoneData zoneData)
+        public void InvokeZoneEntered(ZoneData zoneData)
         {
             OnZoneEntered?.Invoke(zoneData);
         }
         
-        public void InvokeZoneExited(ScriptableObjects.Zone.ZoneData zoneData)
+        public void InvokeZoneExited(ZoneData zoneData)
         {
             OnZoneExited?.Invoke(zoneData);
         }
