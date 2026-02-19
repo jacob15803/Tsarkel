@@ -1,11 +1,13 @@
 using UnityEngine;
 using Tsarkel.Managers;
 using Tsarkel.ScriptableObjects.Buildings;
+using Tsarkel.Systems.Tsunami;
 
 namespace Tsarkel.Systems.Building
 {
     /// <summary>
     /// Manages building health/durability and handles damage from tsunamis.
+    /// Includes elevation-based damage reduction for high-elevation structures.
     /// </summary>
     public class BuildingDurability : MonoBehaviour
     {
@@ -18,6 +20,17 @@ namespace Tsarkel.Systems.Building
         
         [Tooltip("Damage resistance multiplier")]
         [SerializeField] private float damageResistance = 1f;
+        
+        [Header("Elevation-Based Protection")]
+        [Tooltip("Maximum elevation above water for full protection (in units)")]
+        [SerializeField] private float maxProtectionElevation = 20f;
+        
+        [Tooltip("Maximum damage reduction from elevation (0-1, where 1 = 100% reduction)")]
+        [SerializeField] private float maxElevationDamageReduction = 0.7f; // 70% reduction at max elevation
+        
+        [Header("Dependencies")]
+        [Tooltip("Safe elevation detector reference (for elevation calculations)")]
+        [SerializeField] private SafeElevationDetector elevationDetector;
         
         private BuildingData buildingData;
         private bool isInitialized = false;
@@ -71,6 +84,9 @@ namespace Tsarkel.Systems.Building
             // Apply damage resistance
             float actualDamage = damage / damageResistance;
             
+            // Apply elevation-based damage reduction
+            actualDamage = ApplyElevationDamageReduction(actualDamage);
+            
             currentHealth = Mathf.Max(0f, currentHealth - actualDamage);
             
             // Invoke damage event
@@ -81,6 +97,36 @@ namespace Tsarkel.Systems.Building
             {
                 DestroyBuilding();
             }
+        }
+        
+        /// <summary>
+        /// Applies elevation-based damage reduction.
+        /// Higher structures take less damage from tsunamis.
+        /// </summary>
+        /// <param name="damage">Base damage amount</param>
+        /// <returns>Damage after elevation reduction</returns>
+        private float ApplyElevationDamageReduction(float damage)
+        {
+            if (elevationDetector == null)
+            {
+                elevationDetector = FindObjectOfType<SafeElevationDetector>();
+            }
+            
+            if (elevationDetector == null) return damage;
+            
+            // Get building elevation
+            float buildingElevation = transform.position.y;
+            float waterLevel = elevationDetector.CurrentWaterLevel;
+            float elevationAboveWater = buildingElevation - waterLevel;
+            
+            // Calculate protection factor (0-1)
+            float protectionFactor = Mathf.Clamp01(elevationAboveWater / maxProtectionElevation);
+            
+            // Apply damage reduction
+            float damageReduction = protectionFactor * maxElevationDamageReduction;
+            float reducedDamage = damage * (1f - damageReduction);
+            
+            return reducedDamage;
         }
         
         /// <summary>

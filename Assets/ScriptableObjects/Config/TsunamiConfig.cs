@@ -49,6 +49,16 @@ namespace Tsarkel.ScriptableObjects.Config
         [Tooltip("Maximum intensity multiplier cap")]
         [SerializeField] private float maxIntensityMultiplier = 3f;
         
+        [Header("Day-Based Scaling")]
+        [Tooltip("Whether to use day-based intensity scaling (instead of event count)")]
+        [SerializeField] private bool useDayBasedScaling = true;
+        
+        [Tooltip("Intensity multiplier increase per in-game day")]
+        [SerializeField] private float dayScalingFactor = 0.05f;
+        
+        [Tooltip("Base days before scaling starts (grace period)")]
+        [SerializeField] private float baseDaysBeforeScaling = 0f;
+        
         [Header("Physics")]
         [Tooltip("Force applied to player when caught in wave (below safe elevation)")]
         [SerializeField] private float playerForceMultiplier = 50f;
@@ -72,6 +82,9 @@ namespace Tsarkel.ScriptableObjects.Config
         public bool EnableIntensityScaling => enableIntensityScaling;
         public float IntensityIncreasePerEvent => intensityIncreasePerEvent;
         public float MaxIntensityMultiplier => maxIntensityMultiplier;
+        public bool UseDayBasedScaling => useDayBasedScaling;
+        public float DayScalingFactor => dayScalingFactor;
+        public float BaseDaysBeforeScaling => baseDaysBeforeScaling;
         public float PlayerForceMultiplier => playerForceMultiplier;
         public float PlayerDamagePerSecond => playerDamagePerSecond;
         public float LowStructureDamageMultiplier => lowStructureDamageMultiplier;
@@ -92,6 +105,18 @@ namespace Tsarkel.ScriptableObjects.Config
             if (!enableIntensityScaling) return 1f;
             
             float multiplier = 1f + (intensityIncreasePerEvent * eventCount);
+            return Mathf.Min(multiplier, maxIntensityMultiplier);
+        }
+        
+        /// <summary>
+        /// Calculates current intensity multiplier based on in-game days.
+        /// </summary>
+        public float GetIntensityMultiplierByDays(float daysPassed)
+        {
+            if (!enableIntensityScaling || !useDayBasedScaling) return 1f;
+            
+            float effectiveDays = Mathf.Max(0f, daysPassed - baseDaysBeforeScaling);
+            float multiplier = 1f + (dayScalingFactor * effectiveDays);
             return Mathf.Min(multiplier, maxIntensityMultiplier);
         }
     }

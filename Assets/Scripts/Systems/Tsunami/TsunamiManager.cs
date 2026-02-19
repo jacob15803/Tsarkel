@@ -25,6 +25,9 @@ namespace Tsarkel.Systems.Tsunami
         [Tooltip("Player controller reference")]
         [SerializeField] private PlayerController playerController;
         
+        [Tooltip("Tsunami intensity scaler reference (for day-based scaling)")]
+        [SerializeField] private TsunamiIntensityScaler intensityScaler;
+        
         [Header("State")]
         [Tooltip("Current tsunami event count (for intensity scaling)")]
         [SerializeField] private int eventCount = 0;
@@ -80,6 +83,11 @@ namespace Tsarkel.Systems.Tsunami
                 playerController = FindObjectOfType<PlayerController>();
             }
             
+            if (intensityScaler == null)
+            {
+                intensityScaler = FindObjectOfType<TsunamiIntensityScaler>();
+            }
+            
             // Initialize first tsunami timer
             ResetTsunamiTimer();
         }
@@ -129,8 +137,15 @@ namespace Tsarkel.Systems.Tsunami
             currentPhase = TsunamiPhase.Warning;
             phaseTimer = config.WarningDuration;
             
-            // Calculate intensity multiplier
-            currentIntensityMultiplier = config.GetIntensityMultiplier(eventCount);
+            // Calculate intensity multiplier (day-based or event-based)
+            if (config != null && config.UseDayBasedScaling && intensityScaler != null)
+            {
+                currentIntensityMultiplier = intensityScaler.GetIntensityMultiplier();
+            }
+            else
+            {
+                currentIntensityMultiplier = config.GetIntensityMultiplier(eventCount);
+            }
             
             // Lower water level
             if (waterController != null)

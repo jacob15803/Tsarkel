@@ -155,6 +155,87 @@ namespace Tsarkel.Managers
         
         #endregion
         
+        #region Zone Events
+        
+        /// <summary>
+        /// Event fired when player enters a zone.
+        /// Parameters: (zoneData)
+        /// </summary>
+        public event Action<ScriptableObjects.Zone.ZoneData> OnZoneEntered;
+        
+        /// <summary>
+        /// Event fired when player exits a zone.
+        /// Parameters: (zoneData)
+        /// </summary>
+        public event Action<ScriptableObjects.Zone.ZoneData> OnZoneExited;
+        
+        #endregion
+        
+        #region Wildlife Events
+        
+        /// <summary>
+        /// Event fired when a predator is spawned.
+        /// Parameters: (predatorGameObject)
+        /// </summary>
+        public event Action<GameObject> OnPredatorSpawned;
+        
+        /// <summary>
+        /// Event fired when a predator detects the player.
+        /// Parameters: (predatorGameObject)
+        /// </summary>
+        public event Action<GameObject> OnPredatorDetectedPlayer;
+        
+        /// <summary>
+        /// Event fired when a predator attacks the player.
+        /// Parameters: (predatorGameObject, damageAmount)
+        /// </summary>
+        public event Action<GameObject, float> OnPredatorAttackedPlayer;
+        
+        #endregion
+        
+        #region Tribal Events
+        
+        /// <summary>
+        /// Event fired when tribal hostility level changes.
+        /// Parameters: (hostilityLevel)
+        /// </summary>
+        public event Action<float> OnTribalHostilityChanged;
+        
+        /// <summary>
+        /// Event fired when a tribal ambush is triggered.
+        /// </summary>
+        public event Action OnTribalAmbushTriggered;
+        
+        /// <summary>
+        /// Event fired when player performs an action that affects tribal hostility.
+        /// Parameters: (actionType, hostilityChange)
+        /// </summary>
+        public event Action<string, float> OnTribalActionPerformed;
+        
+        #endregion
+        
+        #region Crafting Events
+        
+        /// <summary>
+        /// Event fired when an item is crafted.
+        /// Parameters: (itemData, craftedGameObject)
+        /// </summary>
+        public event Action<ScriptableObjects.Items.ItemData, GameObject> OnItemCrafted;
+        
+        /// <summary>
+        /// Event fired when weapon durability changes.
+        /// Parameters: (weaponGameObject, currentDurability, maxDurability)
+        /// </summary>
+        public event Action<GameObject, float, float> OnWeaponDurabilityChanged;
+        
+        /// <summary>
+        /// Event fired when a weapon breaks (durability reaches 0).
+        /// Parameters: (weaponGameObject)
+        /// </summary>
+        public event Action<GameObject> OnWeaponBroke;
+        
+        #endregion
+        
         #region Event Invocation Methods
         
         // Player Events
@@ -244,6 +325,65 @@ namespace Tsarkel.Managers
         public void InvokeGameTimeChanged(float timeOfDay)
         {
             OnGameTimeChanged?.Invoke(timeOfDay);
+        }
+        
+        // Zone Events
+        public void InvokeZoneEntered(ScriptableObjects.Zone.ZoneData zoneData)
+        {
+            OnZoneEntered?.Invoke(zoneData);
+        }
+        
+        public void InvokeZoneExited(ScriptableObjects.Zone.ZoneData zoneData)
+        {
+            OnZoneExited?.Invoke(zoneData);
+        }
+        
+        // Wildlife Events
+        public void InvokePredatorSpawned(GameObject predator)
+        {
+            OnPredatorSpawned?.Invoke(predator);
+        }
+        
+        public void InvokePredatorDetectedPlayer(GameObject predator)
+        {
+            OnPredatorDetectedPlayer?.Invoke(predator);
+        }
+        
+        public void InvokePredatorAttackedPlayer(GameObject predator, float damageAmount)
+        {
+            OnPredatorAttackedPlayer?.Invoke(predator, damageAmount);
+        }
+        
+        // Tribal Events
+        public void InvokeTribalHostilityChanged(float hostilityLevel)
+        {
+            OnTribalHostilityChanged?.Invoke(hostilityLevel);
+        }
+        
+        public void InvokeTribalAmbushTriggered()
+        {
+            OnTribalAmbushTriggered?.Invoke();
+        }
+        
+        public void InvokeTribalActionPerformed(string actionType, float hostilityChange)
+        {
+            OnTribalActionPerformed?.Invoke(actionType, hostilityChange);
+        }
+        
+        // Crafting Events
+        public void InvokeItemCrafted(ScriptableObjects.Items.ItemData itemData, GameObject craftedObject)
+        {
+            OnItemCrafted?.Invoke(itemData, craftedObject);
+        }
+        
+        public void InvokeWeaponDurabilityChanged(GameObject weapon, float currentDurability, float maxDurability)
+        {
+            OnWeaponDurabilityChanged?.Invoke(weapon, currentDurability, maxDurability);
+        }
+        
+        public void InvokeWeaponBroke(GameObject weapon)
+        {
+            OnWeaponBroke?.Invoke(weapon);
         }
         
         #endregion
