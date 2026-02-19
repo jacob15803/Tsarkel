@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Tsarkel.Managers;
 using Tsarkel.ScriptableObjects.Tribal;
 
 namespace Tsarkel.Systems.Tribal

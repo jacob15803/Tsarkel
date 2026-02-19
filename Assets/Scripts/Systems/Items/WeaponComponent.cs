@@ -93,7 +93,7 @@ namespace Tsarkel.Systems.Items
             var playerStats = target.GetComponent<Player.PlayerStats>();
             if (playerStats != null)
             {
-                playerStats.TakeDamage(weaponData.Damage, weaponData.ItemName);
+                playerStats.TakeDamage(weaponData.Damage, weaponData.ItemData != null ? weaponData.ItemData.ItemName : "Weapon");
             }
             
             // Reduce durability
