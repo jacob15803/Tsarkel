@@ -32,6 +32,7 @@ namespace Tsarkel.Player
         private bool isGrounded;
         private bool isSprinting;
         private Vector3 externalForce; // For tsunami impacts
+        private bool isInCombatMode;   // Suppresses normal WASD movement during combat
         
         /// <summary>
         /// Whether the player is currently grounded.
@@ -89,12 +90,39 @@ namespace Tsarkel.Player
         }
         
         /// <summary>
+        /// Enables or disables combat mode.
+        /// While in combat mode, normal WASD movement is suppressed so the
+        /// DirectionalDodge component can own those inputs.
+        /// </summary>
+        public void SetCombatMode(bool active)
+        {
+            isInCombatMode = active;
+            if (!active)
+            {
+                // Clear horizontal velocity when exiting combat so player doesn't slide
+                velocity.x = 0f;
+                velocity.z = 0f;
+            }
+        }
+
+        /// <summary>Whether the player is currently in combat mode.</summary>
+        public bool IsInCombatMode => isInCombatMode;
+
+        /// <summary>
         /// Handles player movement input and sprinting.
         /// </summary>
         private void HandleMovement()
         {
             if (config == null) return;
-            
+
+            // Combat mode suppresses normal movement — DirectionalDodge handles input instead
+            if (isInCombatMode)
+            {
+                velocity.x = 0f;
+                velocity.z = 0f;
+                return;
+            }
+
             // Get input
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");

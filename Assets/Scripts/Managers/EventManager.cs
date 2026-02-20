@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Tsarkel.ScriptableObjects.Zone;
+using Tsarkel.ScriptableObjects.AI;
 
 namespace Tsarkel.Managers
 {
@@ -215,6 +216,56 @@ namespace Tsarkel.Managers
         
         #endregion
         
+        #region Combat Events
+
+        /// <summary>
+        /// Event fired when combat mode begins with an enemy.
+        /// Parameters: (enemyGameObject)
+        /// </summary>
+        public event Action<GameObject> OnCombatStarted;
+
+        /// <summary>
+        /// Event fired when combat mode ends (enemy defeated, fled, or out of range).
+        /// </summary>
+        public event Action OnCombatEnded;
+
+        /// <summary>
+        /// Event fired when an enemy telegraphs an attack direction.
+        /// Parameters: (attackDirection, telegraphDuration)
+        /// </summary>
+        public event Action<AttackDirection, float> OnAttackTelegraphed;
+
+        /// <summary>
+        /// Event fired when the player attempts a dodge.
+        /// Parameters: (inputDirection, attackDirection, dodgeOutcome)
+        /// </summary>
+        public event Action<AttackDirection, AttackDirection, Systems.Combat.DodgeOutcome> OnDodgeAttempted;
+
+        /// <summary>
+        /// Event fired when the player attempts a parry.
+        /// Parameters: (success)
+        /// </summary>
+        public event Action<bool> OnParryAttempted;
+
+        /// <summary>
+        /// Event fired when the player activates Instinct Mode.
+        /// Parameters: (remainingCharges)
+        /// </summary>
+        public event Action<int> OnInstinctModeActivated;
+
+        /// <summary>
+        /// Event fired when Instinct Mode ends.
+        /// </summary>
+        public event Action OnInstinctModeEnded;
+
+        /// <summary>
+        /// Event fired when the enemy is stunned (e.g., after a successful parry).
+        /// Parameters: (enemyGameObject, stunDuration)
+        /// </summary>
+        public event Action<GameObject, float> OnEnemyStunned;
+
+        #endregion
+
         #region Crafting Events
         
         /// <summary>
@@ -371,6 +422,47 @@ namespace Tsarkel.Managers
             OnTribalActionPerformed?.Invoke(actionType, hostilityChange);
         }
         
+        // Combat Events
+        public void InvokeCombatStarted(GameObject enemy)
+        {
+            OnCombatStarted?.Invoke(enemy);
+        }
+
+        public void InvokeCombatEnded()
+        {
+            OnCombatEnded?.Invoke();
+        }
+
+        public void InvokeAttackTelegraphed(AttackDirection direction, float telegraphDuration)
+        {
+            OnAttackTelegraphed?.Invoke(direction, telegraphDuration);
+        }
+
+        public void InvokeDodgeAttempted(AttackDirection inputDir, AttackDirection attackDir, Systems.Combat.DodgeOutcome outcome)
+        {
+            OnDodgeAttempted?.Invoke(inputDir, attackDir, outcome);
+        }
+
+        public void InvokeParryAttempted(bool success)
+        {
+            OnParryAttempted?.Invoke(success);
+        }
+
+        public void InvokeInstinctModeActivated(int remainingCharges)
+        {
+            OnInstinctModeActivated?.Invoke(remainingCharges);
+        }
+
+        public void InvokeInstinctModeEnded()
+        {
+            OnInstinctModeEnded?.Invoke();
+        }
+
+        public void InvokeEnemyStunned(GameObject enemy, float stunDuration)
+        {
+            OnEnemyStunned?.Invoke(enemy, stunDuration);
+        }
+
         // Crafting Events
         public void InvokeItemCrafted(ScriptableObjects.Items.ItemData itemData, GameObject craftedObject)
         {

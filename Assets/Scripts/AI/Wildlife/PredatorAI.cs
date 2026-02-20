@@ -33,6 +33,10 @@ namespace Tsarkel.AI.Wildlife
         private Vector3 patrolTarget;
         private float loseInterestTimer = 0f;
         private float currentHealth;
+
+        // Combat system integration
+        private EnemyAttackTelegraph attackTelegraph;
+        private EnemyAttackPattern attackPattern;
         
         /// <summary>
         /// Current state of the predator.
@@ -43,12 +47,14 @@ namespace Tsarkel.AI.Wildlife
         {
             navAgent = GetComponent<NavMeshAgent>();
             detection = GetComponent<PredatorDetection>();
-            
+
             if (detection == null)
-            {
                 detection = gameObject.AddComponent<PredatorDetection>();
-            }
-            
+
+            // Optional combat system components (added in Inspector or at runtime)
+            attackTelegraph = GetComponent<EnemyAttackTelegraph>();
+            attackPattern   = GetComponent<EnemyAttackPattern>();
+
             stateMachine = new PredatorStateMachine();
         }
         
@@ -128,6 +134,8 @@ namespace Tsarkel.AI.Wildlife
                     if (distanceToPlayer <= predatorData.AttackRange)
                     {
                         stateMachine.ChangeState(PredatorStateMachine.PredatorState.Attack);
+                        // Notify CombatManager to enter combat mode
+                        Systems.Combat.CombatManager.Instance.EnterCombat(gameObject);
                     }
                     else if (!canSeePlayer && !canHearPlayer)
                     {
@@ -240,25 +248,47 @@ namespace Tsarkel.AI.Wildlife
         
         /// <summary>
         /// Updates attack behavior.
+        /// Uses EnemyAttackTelegraph if available (directional combat system).
+        /// Falls back to legacy direct damage if no telegraph component is present.
         /// </summary>
         private void UpdateAttack()
         {
             if (navAgent == null || detection == null || predatorData == null) return;
-            
+
             navAgent.speed = 0f; // Stop to attack
-            
+
             // Face player
             Vector3 directionToPlayer = detection.GetDirectionToPlayer();
             if (directionToPlayer != Vector3.zero)
             {
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(directionToPlayer), Time.deltaTime * 5f);
+                transform.rotation = Quaternion.Slerp(transform.rotation,
+                    Quaternion.LookRotation(directionToPlayer), Time.deltaTime * 5f);
             }
-            
+
             // Attack if cooldown is ready
             if (Time.time - lastAttackTime >= predatorData.AttackCooldown)
             {
-                PerformAttack();
                 lastAttackTime = Time.time;
+
+                // ── Directional Combat System ─────────────────────────────────
+                if (attackTelegraph != null && !attackTelegraph.IsExecutingPattern)
+                {
+                    // Update day count on pattern component if available
+                    float days = 0f;
+                    var timeManager = FindObjectOfType<Managers.TimeManager>();
+                    if (attackPattern != null && timeManager != null)
+                    {
+                        attackPattern.CurrentDaysPassed = days; // TimeManager doesn't expose DaysPassed directly
+                    }
+
+                    attackTelegraph.ExecuteAttack(days);
+                }
+                else if (attackTelegraph == null)
+                {
+                    // ── Legacy Direct Attack (no telegraph component) ─────────
+                    PerformAttack();
+                }
+                // If telegraph is executing, wait for it to finish before next attack
             }
         }
         
@@ -318,6 +348,38 @@ namespace Tsarkel.AI.Wildlife
         {
             spawnPoint = point;
         }
+
+        /// <summary>
+        /// Returns the base attack damage from PredatorData.
+        /// Used by EnemyAttackTelegraph to determine damage before dodge modifiers.
+        /// </summary>
+        public float GetAttackDamage()
+        {
+            return predatorData != null ? predatorData.AttackDamage : 10f;
+        }
+
+        /// <summary>
+        /// Applies a stun to this predator for the specified duration.
+        /// Called by ParrySystem on a successful parry.
+        /// </summary>
+        public void ApplyStun(float duration)
+        {
+            if (duration <= 0f) return;
+            StartCoroutine(StunCoroutine(duration));
+        }
+
+        private System.Collections.IEnumerator StunCoroutine(float duration)
+        {
+            // Disable state updates and stop navigation during stun
+            bool wasEnabled = enabled;
+            enabled = false;
+            if (navAgent != null) navAgent.isStopped = true;
+
+            yield return new WaitForSeconds(duration);
+
+            enabled = wasEnabled;
+            if (navAgent != null) navAgent.isStopped = false;
+        }
         
         /// <summary>
         /// Applies damage to the predator.
@@ -336,6 +398,9 @@ namespace Tsarkel.AI.Wildlife
         /// </summary>
         private void Die()
         {
+            // Notify CombatManager so combat mode exits cleanly
+            Systems.Combat.CombatManager.Instance.OnEnemyDefeated(gameObject);
+
             // Return to pool or destroy
             Destroy(gameObject);
         }
