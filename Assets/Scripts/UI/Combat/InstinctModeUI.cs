@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using Tsarkel.Managers;
 
 namespace Tsarkel.UI.Combat
@@ -32,7 +31,7 @@ namespace Tsarkel.UI.Combat
 
         [Header("Activation Feedback")]
         [Tooltip("Text shown briefly when Instinct Mode activates")]
-        [SerializeField] private TextMeshProUGUI activationText;
+        [SerializeField] private Text activationText;
 
         [Tooltip("How long the activation text is shown (seconds)")]
         [SerializeField] private float activationTextDuration = 0.6f;

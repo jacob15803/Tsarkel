@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using Tsarkel.Managers;
 using Tsarkel.ScriptableObjects.AI;
 using Tsarkel.Systems.Combat;
@@ -21,8 +20,8 @@ namespace Tsarkel.UI.Combat
     {
         // ─── Inspector Fields ─────────────────────────────────────────────────
         [Header("UI References")]
-        [Tooltip("Text component for dodge feedback (TextMeshPro recommended)")]
-        [SerializeField] private TextMeshProUGUI feedbackText;
+        [Tooltip("Text component for dodge feedback")]
+        [SerializeField] private Text feedbackText;
 
         [Tooltip("Optional background panel behind the text")]
         [SerializeField] private Image backgroundPanel;
@@ -101,6 +100,7 @@ namespace Tsarkel.UI.Combat
             {
                 feedbackText.text  = label;
                 feedbackText.color = color;
+                feedbackText.canvasRenderer.SetAlpha(1f);
             }
 
             SetVisible(true);
@@ -117,9 +117,7 @@ namespace Tsarkel.UI.Combat
 
                 if (feedbackText != null)
                 {
-                    Color c = feedbackText.color;
-                    c.a = alpha;
-                    feedbackText.color = c;
+                    feedbackText.canvasRenderer.SetAlpha(alpha);
                 }
 
                 yield return null;

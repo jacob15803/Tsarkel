@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using Tsarkel.Managers;
 using Tsarkel.ScriptableObjects.AI;
 using Tsarkel.Player.Combat;
@@ -28,7 +27,7 @@ namespace Tsarkel.UI.Combat
 
         [Header("Feedback Text")]
         [Tooltip("Text shown after a parry attempt (PARRY! or FAILED)")]
-        [SerializeField] private TextMeshProUGUI parryFeedbackText;
+        [SerializeField] private Text parryFeedbackText;
 
         [Header("Colors")]
         [SerializeField] private Color openWindowColor   = new Color(0.9f, 0.9f, 0.2f);
